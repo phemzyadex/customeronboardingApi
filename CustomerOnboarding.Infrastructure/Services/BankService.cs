@@ -1,4 +1,5 @@
 using CustomerOnboarding.Core.DTOs;
+using CustomerOnboarding.Core.DTOs.Responses;
 using System.Net.Http.Json;
 
 namespace CustomerOnboarding.Infrastructure.Services
@@ -12,16 +13,35 @@ namespace CustomerOnboarding.Infrastructure.Services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<IEnumerable<BankDto>> GetBanksAsync()
+        public async Task<BankApiResponse> GetBanksAsync()
         {
             var client = _httpClientFactory.CreateClient("alat");
-            var response = await client.GetAsync("merchant-onboarding/api/v1/banks");
+
+            var response = await client.GetAsync("alat-test/api/Shared/GetAllBanks");
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception($"Failed to fetch banks. Status: {response.StatusCode}");
+            {
+                return new BankApiResponse
+                {
+                    HasError = true,
+                    ErrorMessage = $"Failed to fetch banks. Status: {response.StatusCode}",
+                    TimeGenerated = DateTime.UtcNow
+                };
+            }
 
-            var banks = await response.Content.ReadFromJsonAsync<IEnumerable<BankDto>>();
-            return banks ?? Enumerable.Empty<BankDto>();
+            var apiResponse = await response.Content.ReadFromJsonAsync<BankApiResponse>();
+
+            if (apiResponse == null)
+            {
+                return new BankApiResponse
+                {
+                    HasError = true,
+                    ErrorMessage = "Invalid response from bank API.",
+                    TimeGenerated = DateTime.UtcNow
+                };
+            }
+            Console.WriteLine(apiResponse);
+            return apiResponse;
         }
     }
 }

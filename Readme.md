@@ -1,30 +1,36 @@
-# 🏦 Customer Onboarding Microservice API
+## Customer Onboarding Microservice API
 
-A clean-architecture based **ASP.NET Core Web API** for customer onboarding.  
-It demonstrates **best practices** such as Domain-Driven Design, Entity Framework Core, JWT authentication, dependency injection, validation, and Swagger documentation.
+A clean-architecture–based ASP.NET Core Web API microservice for onboarding customers. This repository implements a small production-oriented microservice with the following features:
 
+  - Entity Framework Core (SQL Server)
+  - JWT authentication and role-based authorization
+  - Dependency injection and service abstractions
+  - Swagger/OpenAPI documentation
+  - Unit tests (xUnit, Moq)
+  - FluentValidation for request validation
+  - Mocked OTP sending for phone verification
 ---
 
 ## Features
 - **Customer Onboarding**
-  - Register with Email, Phone Number, Password, State, and LGA.
-  - Phone number verification via **mocked OTP service**.
-  - Prevents duplicate phone/email registration.
+    - Register with Email, Phone Number, Password, State, and LGA.
+    - Phone number verification via **mocked OTP service**.
+    - Prevents duplicate phone/email registration.
 -  **State and LGA Management**
-  - States and LGAs mapped with proper relationships.
-  - Validation ensures LGA belongs to selected State.
+    - States and LGAs mapped with proper relationships.
+    - Validation ensures LGA belongs to selected State.
 -  **Authentication & Authorization**
-  - Secure login with hashed passwords (BCrypt).
-  - JWT tokens including `username`, `role`, and `expiry`.
+    - Secure login with hashed passwords (BCrypt).
+    - JWT tokens including `username`, `role`, and `expiry`.
 -  **Bank Lookup**
-  - Consumes external API [`GetBanks`](https://wema-alatdev-apimgt.developer.azure-api.net/api-details#api=alat-tech-test-api).
-  - Returns a list of supported banks.
+    - Consumes external API [`GetBanks`](https://wema-alatdev-apimgt.developer.azure-api.net/api-details#api=alat-tech-test-api).
+    - Returns a list of supported banks.
 -  **Soft Delete**
-  - Customers can be soft-deleted (marked as deleted without physical removal).
+    - Customers can be soft-deleted (marked as deleted without physical removal).
 -  **Swagger UI**
-  - Auto-generated documentation and interactive testing.
+    - Auto-generated documentation and interactive testing.
 -  **Unit Testing**
-  - Services are interface-driven, supporting mocking and isolated testing.
+    - Services are interface-driven, supporting mocking and isolated testing.
 
 ---
 
@@ -90,31 +96,35 @@ https://localhost:7240/swagger
     "password": "admin123"
   }
   ```
-
+  {
+    "username": "user",
+    "password": "user123"
+  }
+  ```
 
 ## API Endpoints (Summary)
   - Auth
 
-    + POST /api/auth/register → Register new user
+    + POST /api/auth/register → Register new user (Admin only)
     + POST /api/auth/login → Login user (returns JWT)
     + GET /api/auth/users → List all users (Admin only)
 
   -  Customers
-    + POST /api/customers/onboard → Onboard customer (sends OTP)
+    + POST /api/customers/onboard → Onboard customer (sends OTP) (Admin only)
     + POST /api/customers/verify-phone → Verify OTP and complete onboarding
     + GET /api/customers → List all customers
-    + DELETE /api/customers/{id} → Soft delete a customer
+    + DELETE /api/customers/{id} → Soft delete a customer (Admin only)
 
   - States 
-    + POST /api/states → Add a new State
+    + POST /api/states → Add a new State (Admin only)
     + GET /api/states → Get all states
 
   - LGAs
-    + POST /api/lgas → Add a new LGA
+    + POST /api/lgas → Add a new LGA (Admin only)
     + GET /api/states/{id}/lgas → Get LGAs by state
 
   - Banks
-    = GET /api/banks → Fetch all banks (via external Wema API)
+    = GET /api/banks → Fetch all banks (via external Wema API) (Admin only)
 
   - Testing
 

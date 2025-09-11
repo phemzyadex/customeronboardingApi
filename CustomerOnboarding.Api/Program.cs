@@ -29,12 +29,13 @@ builder.Services.AddScoped<LgaService>();
 
 
 // HttpClient for external bank API
-//builder.Services.AddHttpClient("alat", c =>
-//{
-//    c.BaseAddress = new Uri(builder.Configuration["Alat:BaseUrl"]);
-//});
 
-builder.Services.AddHttpClient<IBankService, BankService>();
+builder.Services.AddHttpClient("alat", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Alat:BaseUrl"]);
+});
+
+builder.Services.AddScoped<IBankService, BankService>();
 
 // JWT Auth
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "my_secret_key_1234567890";

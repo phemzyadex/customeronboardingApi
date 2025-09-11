@@ -1,6 +1,7 @@
 ﻿using CustomerOnboarding.Core.DTOs;
 using CustomerOnboarding.Core.DTOs.Responses;
 using CustomerOnboarding.Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CustomerOnboarding.Api.Controllers
@@ -18,6 +19,7 @@ namespace CustomerOnboarding.Api.Controllers
         /// Generates an OTP and sends it (mocked).
         /// </summary>
         [HttpPost("onboard")]
+        [Authorize(Roles = "Administrator")]
         [ProducesResponseType(typeof(ApiResponse<Guid>), 202)]
         [ProducesResponseType(typeof(ApiResponse<Guid>), 400)]
         public async Task<IActionResult> Onboard([FromBody] OnboardCustomerDto dto)
@@ -59,6 +61,7 @@ namespace CustomerOnboarding.Api.Controllers
         /// Soft deletes a customer by Id (marks as deleted without removing).
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrator")]
         [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
         public async Task<IActionResult> DeleteCustomer(Guid id)
         {
