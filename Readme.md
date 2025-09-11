@@ -50,15 +50,15 @@ Entity Framework Core
  + SQL Server
 
 JWT Authentication
-BCrypt.Net  for password hashing
+  + BCrypt.Net  for password hashing
 
 FluentValidation for input validation
 
-Swagger / Swashbuckle for API docs
+Swagger/Swashbuckle for API docs
 
 xUnit for testing
 
-HttpClientFactory for external API calls
+HttpClient for external API calls
 
 Setup & Run 
 1. Clone Repository
@@ -83,9 +83,7 @@ dotnet run --project CustomerOnboarding.Api
 
 5. Access Swagger UI
 
-Navigate to:
-
-https://localhost:7240/swagger
+Navigate to: https://localhost:7240/swagger
 
 ## Authentication
 
@@ -109,10 +107,10 @@ https://localhost:7240/swagger
     + GET /api/auth/users → List all users (Admin only)
 
   -  Customers
-    + POST /api/customers/onboard → Onboard customer (sends OTP) (Admin only)
-    + POST /api/customers/verify-phone → Verify OTP and complete onboarding
-    + GET /api/customers → List all customers
-    + DELETE /api/customers/{id} → Soft delete a customer (Admin only)
+      + POST /api/customers/onboard → Onboard customer (sends OTP) (Admin only)
+      + POST /api/customers/verify-phone → Verify OTP and complete onboarding
+      + GET /api/customers → List all customers
+      + DELETE /api/customers/{id} → Soft delete a customer (Admin only)
 
   - States 
     + POST /api/states → Add a new State (Admin only)
@@ -123,7 +121,7 @@ https://localhost:7240/swagger
     + GET /api/states/{id}/lgas → Get LGAs by state
 
   - Banks
-    = GET /api/banks → Fetch all banks (via external Wema API) (Admin only)
+    + GET /api/banks → Fetch all banks (via external Wema API) (Admin only)
 
   - Testing
 
