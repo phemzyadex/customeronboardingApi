@@ -103,7 +103,7 @@ namespace CustomerOnboarding.Infrastructure.Services
                 customer.OtpExpiresAt = null;
 
                 await _db.SaveChangesAsync();
-                return ApiResponse<bool>.Ok(true, "Phone verified successfully. \r\n Customer onboarding is completed");
+                return ApiResponse<bool>.Ok(true, ("Phone verified successfully. Customer onboarding is completed"));
             }
             catch (Exception ex)
             {
