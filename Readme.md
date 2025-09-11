@@ -56,8 +56,8 @@ HttpClientFactory for external API calls
 
 Setup & Run 
 1. Clone Repository
-git clone https://github.com/phemzyadex/CustomerOnboarding.git
-cd CustomerOnboarding
+  + git clone https://github.com/phemzyadex/CustomerOnboarding.git
+  + cd CustomerOnboarding
 
 2. Configure Database
 
