@@ -1,69 +1,183 @@
 ﻿using CustomerOnboarding.Core.DTOs;
+using CustomerOnboarding.Core.DTOs.Responses;
 using CustomerOnboarding.Core.Interfaces;
 using CustomerOnboarding.Core.Models;
 using CustomerOnboarding.Infrastructure.Data;
 using CustomerOnboarding.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using Xunit;
 
 namespace CustomerOnboarding.Tests
 {
     public class CustomerServiceTests
     {
-        [Fact]
-        public async Task Onboard_GeneratesOtp_And_SavesCustomer()
+        private readonly DbContextOptions<AppDbContext> _dbOptions;
+
+        public CustomerServiceTests()
         {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            _dbOptions = new DbContextOptionsBuilder<AppDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
+        }
 
-            using var ctx = new AppDbContext(options);
-            // seed state + lga
-            var state = new State { Id = Guid.NewGuid(), Name = "Test State" };
-            var lga = new Lga { Id = Guid.NewGuid(), Name = "Test LGA", StateId = state.Id };
-            ctx.States.Add(state);
-            ctx.Lgas.Add(lga);
-            await ctx.SaveChangesAsync();
-
-            var mockOtpSender = new Mock<IOtpSender>();
-            var svc = new CustomerService(ctx, mockOtpSender.Object);
-
-            var dto = new OnboardCustomerDto { Email = "phemyadex@yahoo.com", PhoneNumber = "+2348069419299", StateId = state.Id, LgaId = lga.Id };
-            var id = await svc.OnboardAsync(dto);
-
-            var saved = await ctx.Customers.FindAsync(id);
-            Assert.NotNull(saved);
-            Assert.False(saved.IsPhoneVerified);
-            Assert.NotNull(saved.PendingOtp);
-            mockOtpSender.Verify(m => m.SendOtpAsync(saved.PhoneNumber, saved.PendingOtp), Times.Once);
+        private CustomerService CreateService(Mock<IOtpSender>? otpMock = null)
+        {
+            var db = new AppDbContext(_dbOptions);
+            var otpSender = otpMock?.Object ?? new Mock<IOtpSender>().Object;
+            return new CustomerService(db, otpSender);
         }
 
         [Fact]
-        public async Task VerifyPhone_Succeeds_With_CorrectOtp()
+        public async Task OnboardAsync_ShouldReturnFail_WhenStateNotFound()
         {
-            // setup, create customer with OTP
-            var options = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
-            using var ctx = new AppDbContext(options);
-            var state = new State { Id = Guid.NewGuid(), Name = "S1" };
-            var lga = new Lga { Id = Guid.NewGuid(), Name = "L1", StateId = state.Id };
-            ctx.States.Add(state);
-            ctx.Lgas.Add(lga);
-            var customer = new Customer { Id = Guid.NewGuid(), Email = "a@b.com", PhoneNumber = "0801", StateId = state.Id, LgaId = lga.Id, PendingOtp = "123456", OtpExpiresAt = DateTime.UtcNow.AddMinutes(5) };
-            ctx.Customers.Add(customer);
-            await ctx.SaveChangesAsync();
+            using var db = new AppDbContext(_dbOptions);
+            var service = new CustomerService(db, new Mock<IOtpSender>().Object);
 
-            var svc = new CustomerService(ctx, Mock.Of<IOtpSender>());
-            var ok = await svc.VerifyPhoneAsync(new VerifyPhoneDto { CustomerId = customer.Id, Otp = "123456" });
-            Assert.True(ok);
-            var reloaded = await ctx.Customers.FindAsync(customer.Id);
-            Assert.True(reloaded.IsPhoneVerified);
+            var dto = new OnboardCustomerDto
+            {
+                Email = "test@example.com",
+                PhoneNumber = "+123456789",
+                Password = "password",
+                StateId = Guid.NewGuid(),
+                LgaId = Guid.NewGuid()
+            };
+
+            var result = await service.OnboardAsync(dto);
+
+            Assert.False(result.Success);
+            Assert.Equal("Invalid state ID.", result.Message);
+        }
+
+        [Fact]
+        public async Task OnboardAsync_ShouldCreateCustomer_WhenValid()
+        {
+            using var db = new AppDbContext(_dbOptions);
+            var otpMock = new Mock<IOtpSender>();
+
+            var state = new State
+            {
+                Id = Guid.NewGuid(),
+                Name = "TestState",
+                Lgas = new List<Lga>
+                {
+                    new Lga { Id = Guid.NewGuid(), Name = "TestLga" }
+                }
+            };
+            db.States.Add(state);
+            await db.SaveChangesAsync();
+
+            var service = new CustomerService(db, otpMock.Object);
+
+            var dto = new OnboardCustomerDto
+            {
+                Email = "user@example.com",
+                PhoneNumber = "+111111111",
+                Password = "password",
+                StateId = state.Id,
+                LgaId = state.Lgas.First().Id
+            };
+
+            var result = await service.OnboardAsync(dto);
+
+            Assert.True(result.Success);
+            Assert.Equal("Customer onboarded successfully. OTP sent.", result.Message);
+            Assert.NotNull(result.Data);
+            otpMock.Verify(m => m.SendOtpAsync(dto.PhoneNumber, It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task VerifyPhoneAsync_ShouldFail_WhenCustomerNotFound()
+        {
+            using var db = new AppDbContext(_dbOptions);
+            var service = new CustomerService(db, new Mock<IOtpSender>().Object);
+
+            var result = await service.VerifyPhoneAsync(new VerifyPhoneDto
+            {
+                CustomerId = Guid.NewGuid(),
+                Otp = "123456"
+            });
+
+            Assert.False(result.Success);
+            Assert.Equal("Customer not found.", result.Message);
+        }
+
+        [Fact]
+        public async Task VerifyPhoneAsync_ShouldPass_WhenOtpValid()
+        {
+            using var db = new AppDbContext(_dbOptions);
+            var customer = new Customer
+            {
+                Id = Guid.NewGuid(),
+                Email = "verify@example.com",
+                PhoneNumber = "+222222222",
+                PasswordHash = "hash",
+                PendingOtp = "654321",
+                OtpExpiresAt = DateTime.UtcNow.AddMinutes(5)
+            };
+            db.Customers.Add(customer);
+            await db.SaveChangesAsync();
+
+            var service = new CustomerService(db, new Mock<IOtpSender>().Object);
+
+            var result = await service.VerifyPhoneAsync(new VerifyPhoneDto
+            {
+                CustomerId = customer.Id,
+                Otp = "654321"
+            });
+
+            Assert.True(result.Success);
+            Assert.True(result.Data);
+            Assert.Equal("Phone verified successfully. \r\n Customer onboarding is completed", result.Message);
+        }
+
+        [Fact]
+        public async Task GetAllAsync_ShouldReturnCustomers()
+        {
+            using var db = new AppDbContext(_dbOptions);
+            var state = new State { Id = Guid.NewGuid(), Name = "State" };
+            var lga = new Lga { Id = Guid.NewGuid(), Name = "LGA", State = state };
+            var customer = new Customer
+            {
+                Id = Guid.NewGuid(),
+                Email = "all@example.com",
+                PhoneNumber = "+333333333",
+                PasswordHash = "hash",
+                State = state,
+                Lga = lga
+            };
+            db.Customers.Add(customer);
+            await db.SaveChangesAsync();
+
+            var service = new CustomerService(db, new Mock<IOtpSender>().Object);
+            var result = await service.GetAllAsync();
+
+            Assert.True(result.Success);
+            Assert.Single(result.Data);
+            Assert.Equal("all@example.com", result.Data.First().Email);
+        }
+
+        [Fact]
+        public async Task SoftDeleteCustomerAsync_ShouldMarkCustomerAsDeleted()
+        {
+            using var db = new AppDbContext(_dbOptions);
+            var customer = new Customer
+            {
+                Id = Guid.NewGuid(),
+                Email = "delete@example.com",
+                PasswordHash = "hash",
+                PhoneNumber = "+444444444"
+            };
+            db.Customers.Add(customer);
+            await db.SaveChangesAsync();
+
+            var service = new CustomerService(db, new Mock<IOtpSender>().Object);
+            var result = await service.SoftDeleteCustomerAsync(customer.Id);
+
+            Assert.True(result.Success);
+            Assert.True(result.Data);
+            var deleted = await db.Customers.FindAsync(customer.Id);
+            Assert.True(deleted!.IsDeleted);
         }
     }
-
 }

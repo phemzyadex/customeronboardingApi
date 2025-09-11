@@ -18,54 +18,6 @@ namespace CustomerOnboarding.Infrastructure.Services
             _otpSender = otpSender;
         }
 
-        //public async Task<ApiResponse<Guid>> OnboardAsync(OnboardCustomerDto dto)
-        //{
-        //    try
-        //    {
-        //        var state = await _db.States.Include(s => s.Lgas)
-        //            .FirstOrDefaultAsync(s => s.Id == dto.StateId);
-        //        if (state == null)
-        //            return ApiResponse<Guid>.Fail("Invalid state ID.");
-
-        //        var lga = state.Lgas.FirstOrDefault(l => l.Id == dto.LgaId);
-        //        if (lga == null)
-        //            return ApiResponse<Guid>.Fail("Selected LGA does not belong to the chosen State.");
-
-        //        if (await _db.Customers.AnyAsync(c => c.PhoneNumber == dto.PhoneNumber))
-        //            return ApiResponse<Guid>.Fail("Customer with this phone already exists.");
-
-        //        if (await _db.Customers.AnyAsync(c => c.Email == dto.Email))
-        //            return ApiResponse<Guid>.Fail("Customer with this email already exists.");
-
-        //        var customer = new Customer
-        //        {
-        //            Id = Guid.NewGuid(),
-        //            Email = dto.Email,
-        //            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-        //            PhoneNumber = dto.PhoneNumber,
-        //            StateId = dto.StateId,
-        //            LgaId = dto.LgaId,
-        //            IsPhoneVerified = false,
-        //            OnboardingCompleted = false,
-        //            CreatedAt = DateTime.UtcNow
-        //        };
-
-        //        var otp = new Random().Next(100000, 999999).ToString();
-        //        customer.PendingOtp = otp;
-        //        customer.OtpExpiresAt = DateTime.UtcNow.AddMinutes(5);
-
-        //        _db.Customers.Add(customer);
-        //        await _db.SaveChangesAsync();
-
-        //        await _otpSender.SendOtpAsync(customer.PhoneNumber, otp);
-
-        //        return ApiResponse<Guid>.Ok(customer.Id, "Customer onboarded successfully. OTP sent.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ApiResponse<Guid>.Fail($"Error while onboarding customer: {ex.Message}");
-        //    }
-        //}
         public async Task<ApiResponse<CustomerResponse>> OnboardAsync(OnboardCustomerDto dto)
         {
             try

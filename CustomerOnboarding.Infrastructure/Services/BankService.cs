@@ -40,7 +40,6 @@ namespace CustomerOnboarding.Infrastructure.Services
                     TimeGenerated = DateTime.UtcNow
                 };
             }
-            Console.WriteLine(apiResponse);
             return apiResponse;
         }
     }
