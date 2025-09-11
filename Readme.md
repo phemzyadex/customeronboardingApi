@@ -94,14 +94,13 @@ https://localhost:7240/swagger
   {
     "username": "admin",
     "password": "admin123"
-  }
-  ```
+  }, 
   {
     "username": "user",
     "password": "user123"
   }
   ```
-
+  
 ## API Endpoints (Summary)
   - Auth
 
