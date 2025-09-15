@@ -24,7 +24,7 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IOtpSender, MockOtpSender>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtTokenService>(); 
-builder.Services.AddScoped<StateService>();
+builder.Services.AddScoped<IStateService, StateService>();
 builder.Services.AddScoped<LgaService>();
 
 

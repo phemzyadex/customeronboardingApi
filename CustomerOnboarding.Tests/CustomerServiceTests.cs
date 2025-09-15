@@ -128,7 +128,7 @@ namespace CustomerOnboarding.Tests
 
             Assert.True(result.Success);
             Assert.True(result.Data);
-            Assert.Equal("Phone verified successfully. \r\n Customer onboarding is completed", result.Message);
+            Assert.Equal("Phone verified successfully. Customer onboarding is completed", result.Message);
         }
 
         [Fact]

@@ -57,7 +57,7 @@ namespace CustomerOnboarding.Tests
             var factory = CreateHttpClientFactory(httpResponse);
             var service = new BankService(factory);
 
-            // Act
+            // Act  
             var result = await service.GetBanksAsync();
 
             // Assert
