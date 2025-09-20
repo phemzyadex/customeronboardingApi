@@ -1,16 +1,17 @@
 ﻿using CustomerOnboarding.Core.DTOs.Responses;
+using CustomerOnboarding.Core.Interfaces;
 using CustomerOnboarding.Core.Models;
 using CustomerOnboarding.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace CustomerOnboarding.Infrastructure.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly AppDbContext _db;
-        private readonly JwtTokenService _jwt;
+        private readonly IJwtTokenService _jwt;
 
-        public AuthService(AppDbContext db, JwtTokenService jwt)
+        public AuthService(AppDbContext db, IJwtTokenService jwt)
         {
             _db = db;
             _jwt = jwt;

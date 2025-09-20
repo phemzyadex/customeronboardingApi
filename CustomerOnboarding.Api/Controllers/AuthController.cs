@@ -1,7 +1,7 @@
 ﻿using CustomerOnboarding.Core.DTOs.Requests;
 using CustomerOnboarding.Core.DTOs.Responses;
+using CustomerOnboarding.Core.Interfaces;
 using CustomerOnboarding.Core.Models;
-using CustomerOnboarding.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,9 +12,9 @@ namespace CustomerOnboarding.Api.Controllers
     [Produces("application/json")]
     public class AuthController : ControllerBase
     {
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
 
-        public AuthController(AuthService authService)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
         }
@@ -59,7 +59,7 @@ namespace CustomerOnboarding.Api.Controllers
             if (response == null)
                 return Unauthorized(ApiResponse<string>.Fail("Invalid username or password", null));
 
-            return Ok(ApiResponse<AuthResponseDto>.Ok( response, "Login successful"));
+            return Ok(ApiResponse<AuthResponseDto>.Ok(response, "Login successful"));
         }
 
         /// <summary>

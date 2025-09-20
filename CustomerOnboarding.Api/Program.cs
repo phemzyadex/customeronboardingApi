@@ -22,10 +22,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Services
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IOtpSender, MockOtpSender>();
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<JwtTokenService>(); 
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IStateService, StateService>();
-builder.Services.AddScoped<LgaService>();
+builder.Services.AddScoped<ILgaService, LgaService>();
 
 
 // HttpClient for external bank API

@@ -1,6 +1,6 @@
 ﻿using CustomerOnboarding.Core.DTOs;
 using CustomerOnboarding.Core.DTOs.Responses;
-using CustomerOnboarding.Infrastructure.Services;
+using CustomerOnboarding.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,9 +12,9 @@ namespace CustomerOnboarding.Api.Controllers
     [Produces("application/json")]
     public class StateController : ControllerBase
     {
-        private readonly StateService _service;
+        private readonly IStateService _service;
 
-        public StateController(StateService service)
+        public StateController(IStateService service)
         {
             _service = service;
         }

@@ -1,6 +1,6 @@
 ﻿using CustomerOnboarding.Core.DTOs;
 using CustomerOnboarding.Core.DTOs.Responses;
-using CustomerOnboarding.Infrastructure.Services;
+using CustomerOnboarding.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,9 +12,9 @@ namespace CustomerOnboarding.Api.Controllers
     [Produces("application/json")]
     public class LgaController : ControllerBase
     {
-        private readonly LgaService _service;
+        private readonly ILgaService _service;
 
-        public LgaController(LgaService service)
+        public LgaController(ILgaService service)
         {
             _service = service;
         }

@@ -2,13 +2,14 @@
 using System.Security.Claims;
 using System.Text;
 using CustomerOnboarding.Core.DTOs.Responses;
+using CustomerOnboarding.Core.Interfaces;
 using CustomerOnboarding.Core.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CustomerOnboarding.Infrastructure.Services
 {
-    public class JwtTokenService
+    public class JwtTokenService : IJwtTokenService
     {
         private readonly IConfiguration _config;
 
